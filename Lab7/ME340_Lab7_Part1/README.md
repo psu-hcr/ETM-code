@@ -71,4 +71,4 @@ Serial.println(aval);
 delay (1000);
 ```
 
-Line 25 pauses the program for the amount of time (in milliseconds). Main purpose for pause is to make sure serial port has enough time for communication. 
+**Line 25** pauses the program for the amount of time (in milliseconds). Main purpose for pause is to make sure serial port has enough time for communication. 
