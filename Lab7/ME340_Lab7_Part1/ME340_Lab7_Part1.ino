@@ -1,8 +1,11 @@
+// decrlaring variables to store the pin number 
 int phototransD = 9; //the digital input pin
 int phototransA = A0;//the analog input pin
+
 // decrlaring variables to store the input values
 int val =0;
 int aval =0;
+
 // the setup routine runs once when you press reset:
 void setup () {
   //set input pins
