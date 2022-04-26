@@ -1,4 +1,4 @@
-int phototransD = 9; //the digital input pin
+eint phototransD = 9; //the digital input pin
 int phototransA = A0;//the analog input pin
 // decrlaring variables to store the input values
 int val =0;
