@@ -1,4 +1,4 @@
-# ME340-code
+# ETM-code
 This repo includes all ETM codes.
 Current available class:
 ME340
