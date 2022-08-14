@@ -1,10 +1,11 @@
-//https://www.hackster.io/Marcazzan_M/motor-speed-control-with-one-transistor-0921a8
-const byte CHA = 2; // Define pin 2
-const byte CHB = 3; // Define pin 3
+//Setting up interrupt pins
+#define EncoderInterruptA 0
+#define EncoderInterruptB 1
+#define EncoderPinA 2 //Must be pin 2 (Only pin 2 and 3 are interrupt pins)
+#define EncoderPinB 3 //Must be pin 3
+
 const byte motorPin = 10; // Define pin 10
 volatile byte state = LOW; //the initial state
-volatile long count = 0 ; // count
-volatile long count_last = 0; // count
 float RPM = 0 ; // RPM
 float dcount = 0; // count
 
@@ -12,16 +13,28 @@ float dcount = 0; // count
 unsigned long t1=0;
 unsigned long t0=0;
 unsigned long dt=0;
-unsigned long st=10;
+unsigned long st=500;
+
+//Defines variables for pin states
+volatile bool EncoderASet;
+volatile bool EncoderBSet;
+volatile bool EncoderAPrev;
+volatile bool EncoderBPrev;
+
+volatile long EncoderTicks = 0; //Initializing Tick COunter
+volatile long PrevEncoderTicks = 0; 
+float MotorCPR = 542; //CHANGE TO CORRECT CPR
 
 void setup()
 {
   pinMode(motorPin, OUTPUT);  // sets the pin as output
-  pinMode(CHA, INPUT_PULLUP); // Set the CHA as INPUT_PULLUP
-  pinMode(CHB, INPUT_PULLUP); // Set the CHB as INPUT_PULLUP
+  pinMode(EncoderPinA, INPUT);      // sets pin A as input
+  digitalWrite(EncoderPinA, LOW);  // turn on pullup resistors
+  pinMode(EncoderPinB, INPUT);      // sets pin B as input
+  digitalWrite(EncoderPinB, LOW);  // turn on pullup resistors
   
-  attachInterrupt(digitalPinToInterrupt(CHA), flag, RISING); // External interrupt: the  function will be called when the signal on CHA pin changes
-  //attachInterrupt(digitalPinToInterrupt(CHB), flag, RISING); // External interrupt: the  function will be called when the signal on CHB pin changes
+  attachInterrupt(digitalPinToInterrupt(EncoderPinA), HandleMotorInterruptA, CHANGE); //Setting up first interrupt
+  attachInterrupt(digitalPinToInterrupt(EncoderPinB), HandleMotorInterruptB, CHANGE); //Setting up second interrupt
   Serial.begin(115200);
   Serial.println("Time[ms], Counts , RPM");
   Serial.println(" ");
@@ -35,10 +48,10 @@ void loop()
     t1 = millis();   // Reset the delta_time
     dt = t1-t0;
     if (dt >= st) {           // While dt is smaller than the sample time ...
-      dcount = count - count_last;
+      dcount = abs(EncoderTicks - PrevEncoderTicks);
       RPM = (dcount*60*1000)/(542*dt);
       print_count();
-      count_last = count;
+      PrevEncoderTicks = EncoderTicks;
       
       t0 = millis();   // ... stay in this loop checking the clock.
     }
@@ -47,31 +60,55 @@ void loop()
 
 }
 
-//interrupt
-void flag() {
-  state = 1;
-  
-  //add 1 to count for CW
-  if (digitalRead(CHA) && digitalRead(CHB)) {
-    count++;
-  }
 
-  //substract 1 from count for CCW
-  if (digitalRead(CHA) && !digitalRead(CHB)) {
-    count--;
+
+// Interrupt service routine for Channel A
+void HandleMotorInterruptA(){
+  //Read Encoder Pins
+  EncoderBSet = digitalRead(EncoderPinB);
+  EncoderASet = digitalRead(EncoderPinA);
+  
+  EncoderTicks+=ParseEncoder(); //either incremensts encoder up or down
+
+  //Stores previous encoder value
+  EncoderAPrev = EncoderASet;
+  EncoderBPrev = EncoderBSet;
+}
+
+// Interrupt service routine for Channel B
+void HandleMotorInterruptB(){
+  //Read Encoder Pins
+  EncoderBSet = digitalRead(EncoderPinB);
+  EncoderASet = digitalRead(EncoderPinA);
+  
+  EncoderTicks+=ParseEncoder(); //either incremensts encoder up or down
+
+  //Stores previous encoder value
+  EncoderAPrev = EncoderASet;
+  EncoderBPrev = EncoderBSet;
+}
+
+//Checks if count needs to go up or down based off previous and current states of channels
+int ParseEncoder(){
+  if(EncoderAPrev && EncoderBPrev){
+    if(!EncoderASet && EncoderBSet) return 1;
+    if(EncoderASet && !EncoderBSet) return -1;
+  }else if(!EncoderAPrev && EncoderBPrev){
+    if(!EncoderASet && !EncoderBSet) return 1;
+    if(EncoderASet && EncoderBSet) return -1;
+  }else if(!EncoderAPrev && !EncoderBPrev){
+    if(EncoderASet && !EncoderBSet) return 1;
+    if(!EncoderASet && EncoderBSet) return -1;
+  }else if(EncoderAPrev && !EncoderBPrev){
+    if(EncoderASet && EncoderBSet) return 1;
+    if(!EncoderASet && !EncoderBSet) return -1;
   }
 }
 
 void print_count(){
-    if (state)
-  {
     Serial.print(t1);                      // Print data to serial monitor
     Serial.print(",  ");
-    Serial.print(count);
-    Serial.print(",  ");
-    Serial.print(count_last);
+    Serial.print(EncoderTicks);
     Serial.print(",  ");
     Serial.println(RPM);
-    state = 0;//clear state
-  }//end if
 }
