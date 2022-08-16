@@ -5,8 +5,6 @@
 #include "Arduino.h"
 
 //Setting up interrupt pins
-#define EncoderInterruptA 0
-#define EncoderInterruptB 1
 #define EncoderPinA 2 //Must be pin 2 (Only pin 2 and 3 are interrupt pins)
 #define EncoderPinB 3 //Must be pin 3
 
