@@ -1,7 +1,8 @@
 import pandas as pd
 import csv
 def combinetwolist(index,pre,post):
-    #this function combine two list into one list. The first 
+    # This function combine two list into one list. 
+    # The first element in combine list is the ID.
     conbinelist = [index]
     for i in range(2,len(pre)):
         conbinelist.append(pre[i])
@@ -13,8 +14,8 @@ def combinetwolist(index,pre,post):
 
 def main():
     # convert csv to list
-    pre_df = pd.read_csv(r'D:\ETM\Testing data\Aug17th\ETM pre survey_modified.csv')
-    post_df = pd.read_csv(r'D:\ETM\Testing data\Aug17th\ETM post survey_modified.csv')
+    pre_df = pd.read_csv(r'D:\ETM\Testing data\Aug17th\ETM pre survey_modified.csv')    # import pre survey data; r is to allow space in address
+    post_df = pd.read_csv(r'D:\ETM\Testing data\Aug17th\ETM post survey_modified.csv')  # import post survey data
     pre_list = pre_df.values.tolist()
     post_list = post_df.values.tolist()
     Paired_list = []    
@@ -26,14 +27,12 @@ def main():
     # Using double for loop for pairing
     for i in range(1, len(pre_list)):
         for j in range(1, len(post_list)):
-            if(pre_list[i][0].lower()) == (post_list[j][0].lower()) and (pre_list[i][1].lower()) == (post_list[j][1].lower()):
-            
+            if(pre_list[i][0].lower()) == (post_list[j][0].lower()) and (pre_list[i][1].lower()) == (post_list[j][1].lower()):  # if both first name and last name are matched
                 #print("pre name is", pre_list[i][0],pre_list[i][1])
                 #print("post name is", post_list[j][0],post_list[j][1])
-                
-                Paired_list.append(combinetwolist(i,pre_list[i],post_list[j]))   # paired pre and post lists of one students into one list. Attach it to final list 
-                post_list.remove(post_list[j])  # removed matched name to speed up running 
-                break   # Stop loop once find matched name in post survey 
+                Paired_list.append(combinetwolist(i,pre_list[i],post_list[j]))   # paired pre and post lists of one students into one list. Attach it to output list 
+                post_list.remove(post_list[j])  # removed matched name from post list to speed up running 
+                break   # Stop searching loop once find matched name in post survey 
                 
                 
     #print(len(post_list))
