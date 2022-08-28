@@ -6,8 +6,8 @@ clc;                                % clear command window
 a = arduino();
 
 for i = 1:10                        % loop 10 times
-    writeDigitalPin(a, 'D13', 0);   % turn on pin 13 off 
+    writeDigitalPin(a, 'D13', 0);   % set voltage across pin 13 to 0 
     pause(0.5);                     % wait 0.5s
-    writeDigitalPin(a, 'D13', 1);   % turn on pin 13 on 
+    writeDigitalPin(a, 'D13', 1);   % set voltage across pin 13 to 1 
     pause(0.5);                     % wait 0.5s
 end
